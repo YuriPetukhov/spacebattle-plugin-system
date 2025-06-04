@@ -12,9 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PluginYamlUtilTest {
 
-    /**
-     * Создаёт временный JAR-файл с plugin.yaml и возвращает путь к нему.
-     */
     private File createJarWithPluginYaml(String yamlContent) throws IOException {
         File tempJar = File.createTempFile("plugin", ".jar");
 

@@ -63,7 +63,7 @@ public class PluginYamlUtilTest {
         @Override
         public void apply(ClassLoader loader, Map<String, Object> pluginSpec) {
             wasApplied = true;
-            System.out.println("✅ MockComponent applied");
+            System.out.println("MockComponent applied");
         }
     }
 }

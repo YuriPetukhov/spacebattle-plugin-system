@@ -19,16 +19,13 @@ class FileDslSourceTest {
 
         FileDslSource source = new FileDslSource(tempFile);
 
-        // Act
         String result;
         try (InputStream in = source.openStream()) {
             result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
 
-        // Assert
         assertTrue(result.contains("test: 123"));
 
-        // Cleanup
         assertTrue(tempFile.delete());
     }
 }
