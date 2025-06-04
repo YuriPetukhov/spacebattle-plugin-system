@@ -72,24 +72,22 @@ jobs:
 
       - name: Build and install core
         run: |
-          cd core
-          mvn clean install
+          mvn -f core/pom.xml clean install
 
       - name: Build and install server
         run: |
-          cd ../server
-          mvn clean install
+          mvn -f server/pom.xml clean install
 
       - name: Build and test all other Maven projects
         run: |
-          for d in ../*; do
-            if [ -f "$d/pom.xml" ] && [[ "$d" != *"core"* && "$d" != *"server"* ]]; then
+          for d in *; do
+            if [ -f "$d/pom.xml" ] && [ "$d" != "core" ] && [ "$d" != "server" ]; then
               echo "=== Building $d ==="
-              (cd "$d" && mvn clean verify \
+              mvn -f "$d/pom.xml" clean verify \
                 -Dspring.datasource.url=${{ env.POSTGRES_URL }} \
                 -Dspring.datasource.username=${{ env.POSTGRES_USER }} \
                 -Dspring.datasource.password=${{ env.POSTGRES_PASSWORD }} \
-                -DKAFKA_BOOTSTRAP_SERVERS=${{ env.KAFKA_BOOTSTRAP_SERVERS }} ) || exit 1
+                -DKAFKA_BOOTSTRAP_SERVERS=${{ env.KAFKA_BOOTSTRAP_SERVERS }} || exit 1
             fi
           done
 
