@@ -1,0 +1,16 @@
+objects:
+  ship-1:
+    properties:
+      location: { x: 0, y: 0 }
+      velocity: { x: 1, y: 1 }
+    capabilities:
+      - move
+
+  ship-2:
+    properties:
+      location: { x: 5, y: 5 }
+      angle: 0
+      velocity: { x: 4, y: 0 }
+    capabilities:
+      - move
+      - rotate

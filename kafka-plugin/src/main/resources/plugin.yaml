@@ -1,0 +1,7 @@
+plugin:
+  name: kafka-plugin
+  commands: []
+  middleware: []
+  bootstrap:
+    - class: org.spacebattle.KafkaPluginBootstrap
+    - class: org.spacebattle.KafkaEventPublisherBootstrap

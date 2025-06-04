@@ -1,0 +1,6 @@
+plugin:
+  name: macro-plugin
+  commands:
+    - name: macro
+      handler: org.spacebattle.MacroCommandFactory
+      type: factory

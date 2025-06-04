@@ -1,0 +1,4 @@
+plugin:
+  name: token-plugin
+  bootstrap:
+    - class: org.spacebattle.TokenPluginBootstrap

@@ -1,0 +1,3 @@
+plugin:
+  components:
+    - org.spacebattle.EventLoopCommandRegistrar

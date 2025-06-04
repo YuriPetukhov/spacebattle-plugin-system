@@ -1,0 +1,6 @@
+plugin:
+  name: dsl-runner
+  commands:
+    - name: dsl-runner
+      handler: org.spacebattle.JsonDSLCommandFactory
+      type: factory

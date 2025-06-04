@@ -1,0 +1,8 @@
+plugin:
+  name: movement-plugin
+  commands:
+    - name: move
+      handler: org.spacebattle.MoveCommandFactory
+      type: factory
+  bootstrap:
+    - class: org.spacebattle.MovePluginBootstrap

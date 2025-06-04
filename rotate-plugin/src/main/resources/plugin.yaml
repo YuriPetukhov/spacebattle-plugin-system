@@ -1,0 +1,6 @@
+plugin:
+  name: rotate-plugin
+  commands:
+    - name: rotate
+      handler: org.spacebattle.RotateCommandFactory
+      type: factory

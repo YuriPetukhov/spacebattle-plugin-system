@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+    networks:
+      - spacebattle
+
+  kafka:
+    image: bitnami/kafka:3.4
+    container_name: kafka
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ENABLE_KRAFT=no
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - spacebattle
+
+  spacebattle-server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: spacebattle-server
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    volumes:
+      - ./plugins:/app/plugins
+    ports:
+      - "8080:8080"
+    networks:
+      - spacebattle
+    command: >
+      java
+      -Dtoken.verifier.url=http://gateway:8080/auth/verify
+      -jar app.jar
+
+  postgres:
+    image: postgres:15
+    container_name: spacebattle-postgres
+    environment:
+      POSTGRES_DB: spacebattle
+      POSTGRES_USER: space
+      POSTGRES_PASSWORD: battle
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - spacebattle
+
+  auth-service:
+    build:
+      context: ./auth-service        # путь к проекту с auth-сервисом
+      dockerfile: Dockerfile
+    container_name: spacebattle-auth
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/spacebattle
+      SPRING_DATASOURCE_USERNAME: space
+      SPRING_DATASOURCE_PASSWORD: battle
+    ports:
+      - "8081:8080"  # доступен извне на 8081
+    depends_on:
+      - postgres
+    networks:
+      - spacebattle
+
+  gateway:
+    build:
+      context: ./gateway-service  # путь к твоему gateway-проекту
+      dockerfile: Dockerfile
+    container_name: spacebattle-gateway
+    ports:
+      - "8088:8080" # внешне доступен на 8088, внутри — 8080
+    depends_on:
+      - spacebattle-server
+      - auth-service
+    networks:
+      - spacebattle
+
+networks:
+  spacebattle:
+    driver: bridge
+
+volumes:
+  postgres_data:

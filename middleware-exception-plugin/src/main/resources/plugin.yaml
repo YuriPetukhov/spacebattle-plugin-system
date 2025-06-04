@@ -1,0 +1,5 @@
+plugin:
+  name: middleware-exception
+  middleware:
+    - class: org.spacebattle.ExceptionCatchingMiddleware
+    - class: org.spacebattle.ScopeMiddleware

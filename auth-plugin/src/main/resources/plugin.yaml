@@ -1,0 +1,5 @@
+plugin:
+  name: auth-plugin
+  commands: []
+  middleware:
+    - class: org.spacebattle.AuthMiddleware

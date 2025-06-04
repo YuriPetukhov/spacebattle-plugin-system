@@ -1,0 +1,6 @@
+plugin:
+  name: http-controller-plugin
+  bootstrap:
+    - class: org.spacebattle.CommandControllerBootstrap
+  exceptionHandlers:
+  - class: org.spacebattle.ClientInputExceptionHandler

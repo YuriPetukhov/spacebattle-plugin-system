@@ -1,0 +1,11 @@
+objects:
+  ship-5:
+    properties:
+      location:
+        x: 0
+        y: 0
+      velocity:
+        dx: 1
+        dy: 1
+    capabilities:
+      - move

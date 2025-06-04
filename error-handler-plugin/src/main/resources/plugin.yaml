@@ -1,0 +1,6 @@
+plugin:
+  name: logging-exception-plugin
+  commands: []
+  middleware: []
+  exceptions:
+    - class: org.spacebattle.LoggingExceptionHandler

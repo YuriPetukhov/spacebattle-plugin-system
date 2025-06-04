@@ -1,0 +1,4 @@
+plugin:
+  name: hello-plugin
+  components:
+    - class: org.spacebattle.HelloComponent
