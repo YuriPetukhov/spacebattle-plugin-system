@@ -88,7 +88,7 @@ jobs:
                 -Dspring.datasource.username=${{ env.POSTGRES_USER }} \
                 -Dspring.datasource.password=${{ env.POSTGRES_PASSWORD }} \
                 -DKAFKA_BOOTSTRAP_SERVERS=${{ env.KAFKA_BOOTSTRAP_SERVERS }} || true
-
+          
               echo "=== Test output for $d ==="
               find "$d/target/surefire-reports" -type f -name "*.txt" -exec echo "--- {} ---" \; -exec cat {} \; || echo "No test logs found for $d"
             fi
@@ -101,21 +101,6 @@ jobs:
           find . -type f -regex ".*/target/.*-reports/.*" -exec cp --parents {} test-results \;
           find . -type d -name "jacoco" -exec cp -r --parents {} test-results \;
           find . -type d -name "jacoco-aggregate" -exec cp -r --parents {} test-results \;
-
-      - name: Print Total Coverage to log
-        if: always()
-        run: |
-          echo "==== Test Coverage Summary ===="
-          total_coverage=$(grep -A 1 '<tfoot>' **/target/site/jacoco*/index.html | grep -oP '\d+(?:\.\d+)?%' | head -1 || echo "Not found")
-          echo "Total Coverage: $total_coverage"
-
-      - name: Copy overall JaCoCo report
-        if: always()
-        run: |
-          mkdir -p test-results/summary
-          find . -type d -name "jacoco-aggregate" | while read dir; do
-            cp -r "$dir"/* test-results/summary/
-          done
 
       - name: Upload test artifacts
         if: always()
