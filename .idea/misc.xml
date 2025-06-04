@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/rotate-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/middleware-exception-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/kafka-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/http-controller-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/auth-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/auth-service/pom.xml" />
+        <option value="$PROJECT_DIR$/core/pom.xml" />
+        <option value="$PROJECT_DIR$/dsl/pom.xml" />
+        <option value="$PROJECT_DIR$/error-handler-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/game-client-ui/pom.xml" />
+        <option value="$PROJECT_DIR$/hello-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/logging-exception-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/logging-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/macro-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/movement-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/eventloop-control-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/http-registration-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/gateway-service/pom.xml" />
+        <option value="$PROJECT_DIR$/token-plugin/pom.xml" />
+      </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/logging-exception-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/plugins/movement-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/plugins/pom.xml" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_19" default="true" project-jdk-name="19" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>
