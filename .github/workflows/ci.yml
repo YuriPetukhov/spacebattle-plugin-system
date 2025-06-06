@@ -62,32 +62,15 @@ jobs:
 
       - name: Build with coverage
         run: |
-          # Собираем все модули с генерацией jacoco.exec
-          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install \
+          mvn clean verify org.jacoco:jacoco-maven-plugin:prepare-agent \
             -Dspring.datasource.url=${{ env.POSTGRES_URL }} \
             -Dspring.datasource.username=${{ env.POSTGRES_USER }} \
             -Dspring.datasource.password=${{ env.POSTGRES_PASSWORD }} \
             -DKAFKA_BOOTSTRAP_SERVERS=${{ env.KAFKA_BOOTSTRAP_SERVERS }}
 
-      - name: Generate module reports
-        run: |
-          # Генерируем отчёты для каждого модуля
-          for dir in $(find . -name "pom.xml" -exec dirname {} \; | sort -u); do
-            echo "Generating report for $dir"
-            (cd "$dir" && mvn org.jacoco:jacoco-maven-plugin:report)
-          done
-
-      - name: Merge all coverage data
-        run: |
-          # Находим все jacoco.exec и объединяем через Maven
-          FILES=$(find . -name "jacoco.exec" | paste -sd "," -)
-          mvn org.jacoco:jacoco-maven-plugin:merge \
-            -Djacoco.destFile=target/merged-jacoco.exec \
-            -Djacoco.dataFiles=$FILES
-
       - name: Generate aggregate report
-        run: |
-          mvn -f coverage-report/pom.xml verify
+        run: mvn -f coverage-report/pom.xml verify
+
       
 
       - name: Upload reports
