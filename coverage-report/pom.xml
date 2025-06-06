@@ -58,7 +58,7 @@
         </dependency>
         <dependency>
             <groupId>org.spacebattle</groupId>
-            <artifactId>eventloop-control-plugin</artifactId>
+            <artifactId>en</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
