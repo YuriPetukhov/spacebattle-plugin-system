@@ -85,3 +85,10 @@ jobs:
       - name: Generate aggregate report
         run: mvn -f coverage-report/pom.xml verify
 
+      - name: Upload aggregated coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-aggregate-report
+          path: coverage-report/target/site/jacoco-aggregate
+
+
