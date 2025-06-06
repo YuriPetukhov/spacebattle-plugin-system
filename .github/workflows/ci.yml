@@ -104,7 +104,7 @@ jobs:
               }
               NR > 1 {
                 split($1, pathParts, "/")
-                module = pathParts[2]
+                module = pathParts[length(pathParts)]
                 instr_missed[module] += $4
                 instr_covered[module] += $5
                 branch_missed[module] += $6
@@ -135,6 +135,7 @@ jobs:
           fi
 
           cat $GITHUB_STEP_SUMMARY
+      
       
       
       
