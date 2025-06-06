@@ -98,38 +98,44 @@ jobs:
           echo "|--------|--------------:|----------------:|" >> $GITHUB_STEP_SUMMARY
 
           if [ -f "coverage-report/target/site/jacoco-aggregate/jacoco.csv" ]; then
-            echo "--- jacoco.csv content ---"
-            cat coverage-report/target/site/jacoco-aggregate/jacoco.csv
-            echo "--- end of jacoco.csv ---"
-
             awk -F, '
               BEGIN {
-                total_instr_missed = 0;
-                total_instr_covered = 0;
-                total_branch_missed = 0;
-                total_branch_covered = 0;
+                OFMT="%.2f"
               }
               NR > 1 {
-                total_instr_missed += $4;
-                total_instr_covered += $5;
-                total_branch_missed += $6;
-                total_branch_covered += $7;
+                split($1, pathParts, "/")
+                module = pathParts[2]
+                instr_missed[module] += $4
+                instr_covered[module] += $5
+                branch_missed[module] += $6
+                branch_covered[module] += $7
+                total_instr_missed += $4
+                total_instr_covered += $5
+                total_branch_missed += $6
+                total_branch_covered += $7
               }
               END {
-                total_instr = total_instr_missed + total_instr_covered;
-                total_branch = total_branch_missed + total_branch_covered;
-
-                line_cov = total_instr > 0 ? (total_instr_covered * 100.0 / total_instr) : 0;
-                branch_cov = total_branch > 0 ? (total_branch_covered * 100.0 / total_branch) : 0;
-
-                printf "| All Modules | %.2f%% | %.2f%% |\n", line_cov, branch_cov;
+                for (m in instr_missed) {
+                  instr_total = instr_missed[m] + instr_covered[m]
+                  branch_total = branch_missed[m] + branch_covered[m]
+                  line_pct = instr_total > 0 ? instr_covered[m] * 100 / instr_total : 0
+                  branch_pct = branch_total > 0 ? branch_covered[m] * 100 / branch_total : 0
+                  printf("| %s | %.2f%% | %.2f%% |\n", m, line_pct, branch_pct) >> ENVIRON["GITHUB_STEP_SUMMARY"]
+                }
+                total_instr = total_instr_missed + total_instr_covered
+                total_branch = total_branch_missed + total_branch_covered
+                total_line_pct = total_instr > 0 ? total_instr_covered * 100 / total_instr : 0
+                total_branch_pct = total_branch > 0 ? total_branch_covered * 100 / total_branch : 0
+                printf("\n**Total Coverage**\n\n") >> ENVIRON["GITHUB_STEP_SUMMARY"]
+                printf("| All Modules | %.2f%% | %.2f%% |\n", total_line_pct, total_branch_pct) >> ENVIRON["GITHUB_STEP_SUMMARY"]
               }
-            ' "coverage-report/target/site/jacoco-aggregate/jacoco.csv" >> $GITHUB_STEP_SUMMARY
+            ' "coverage-report/target/site/jacoco-aggregate/jacoco.csv"
           else
             echo "jacoco.csv not found!" >> $GITHUB_STEP_SUMMARY
           fi
 
           cat $GITHUB_STEP_SUMMARY
+      
       
       
 
