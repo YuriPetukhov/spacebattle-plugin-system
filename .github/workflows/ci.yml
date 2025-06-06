@@ -98,21 +98,31 @@ jobs:
           echo "|--------|--------------:|----------------:|" >> $GITHUB_STEP_SUMMARY
 
           if [ -f "coverage-report/target/site/jacoco-aggregate/jacoco.csv" ]; then
-            # Покажем содержимое файла для отладки
             echo "--- jacoco.csv content ---"
             cat coverage-report/target/site/jacoco-aggregate/jacoco.csv
             echo "--- end of jacoco.csv ---"
 
             awk -F, '
-              BEGIN { OFS = "," }
-              NR>1 && ($1 == "All classes" || $1 == "Total") {
-                total = $4 + $5;
-                if (total > 0) {
-                  line = $5 * 100 / total;
-                  branch_total = $6 + $7;
-                  branch = branch_total > 0 ? $7 * 100 / branch_total : 0;
-                  printf "| All Modules | %.2f%% | %.2f%% |\n", line, branch;
-                }
+              BEGIN {
+                total_instr_missed = 0;
+                total_instr_covered = 0;
+                total_branch_missed = 0;
+                total_branch_covered = 0;
+              }
+              NR > 1 {
+                total_instr_missed += $4;
+                total_instr_covered += $5;
+                total_branch_missed += $6;
+                total_branch_covered += $7;
+              }
+              END {
+                total_instr = total_instr_missed + total_instr_covered;
+                total_branch = total_branch_missed + total_branch_covered;
+
+                line_cov = total_instr > 0 ? (total_instr_covered * 100.0 / total_instr) : 0;
+                branch_cov = total_branch > 0 ? (total_branch_covered * 100.0 / total_branch) : 0;
+
+                printf "| All Modules | %.2f%% | %.2f%% |\n", line_cov, branch_cov;
               }
             ' "coverage-report/target/site/jacoco-aggregate/jacoco.csv" >> $GITHUB_STEP_SUMMARY
           else
@@ -120,6 +130,7 @@ jobs:
           fi
 
           cat $GITHUB_STEP_SUMMARY
+      
       
 
 
