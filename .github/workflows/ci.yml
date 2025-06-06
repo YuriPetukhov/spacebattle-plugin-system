@@ -91,4 +91,26 @@ jobs:
           name: jacoco-aggregate-report
           path: coverage-report/target/site/jacoco-aggregate
 
+      - name: Display coverage
+        run: |
+          echo "### Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Module | Line Coverage | Branch Coverage |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------------:|----------------:|" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "coverage-report/target/site/jacoco-aggregate/jacoco.csv" ]; then
+            awk -F, '
+              NR>1 && $1=="Total" && $2=="" {
+                total = $4 + $5;
+                if(total > 0) {
+                  line = $5 * 100 / total;
+                  branch_total = $6 + $7;
+                  branch = branch_total > 0 ? $7 * 100 / branch_total : 0;
+                  printf "| All Modules | %.2f%% | %.2f%% |\n", line, branch;
+                }
+              }
+            ' "coverage-report/target/site/jacoco-aggregate/jacoco.csv" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          cat $GITHUB_STEP_SUMMARY
+
 
