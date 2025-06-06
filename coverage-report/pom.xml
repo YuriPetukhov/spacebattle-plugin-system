@@ -58,7 +58,7 @@
         </dependency>
         <dependency>
             <groupId>org.spacebattle</groupId>
-            <artifactId>en</artifactId>
+            <artifactId>core</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
