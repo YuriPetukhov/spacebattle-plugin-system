@@ -60,6 +60,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Install parent pom
+        run: mvn -N install
+
       - name: Build core
         run: mvn -f core/pom.xml clean install -DskipTests
 
