@@ -98,10 +98,16 @@ jobs:
           echo "|--------|--------------:|----------------:|" >> $GITHUB_STEP_SUMMARY
 
           if [ -f "coverage-report/target/site/jacoco-aggregate/jacoco.csv" ]; then
+            # Покажем содержимое файла для отладки
+            echo "--- jacoco.csv content ---"
+            cat coverage-report/target/site/jacoco-aggregate/jacoco.csv
+            echo "--- end of jacoco.csv ---"
+
             awk -F, '
-              NR>1 && $1=="Total" && $2=="" {
+              BEGIN { OFS = "," }
+              NR>1 && ($1 == "All classes" || $1 == "Total") {
                 total = $4 + $5;
-                if(total > 0) {
+                if (total > 0) {
                   line = $5 * 100 / total;
                   branch_total = $6 + $7;
                   branch = branch_total > 0 ? $7 * 100 / branch_total : 0;
@@ -109,8 +115,11 @@ jobs:
                 }
               }
             ' "coverage-report/target/site/jacoco-aggregate/jacoco.csv" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "jacoco.csv not found!" >> $GITHUB_STEP_SUMMARY
           fi
 
           cat $GITHUB_STEP_SUMMARY
+      
 
 
