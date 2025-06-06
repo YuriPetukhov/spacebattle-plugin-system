@@ -79,10 +79,11 @@ jobs:
 
       - name: Merge all coverage data
         run: |
-          # Собираем все jacoco.exec файлы
-          find . -name "jacoco.exec" -exec echo -n "--input-files {} " \; | xargs \
-            mvn org.jacoco:jacoco-maven-plugin:merge \
-              -Djacoco.destFile=./target/merged-jacoco.exec
+          # Находим все jacoco.exec и объединяем через Maven
+          FILES=$(find . -name "jacoco.exec" | paste -sd "," -)
+          mvn org.jacoco:jacoco-maven-plugin:merge \
+            -Djacoco.destFile=target/merged-jacoco.exec \
+            -Djacoco.dataFiles=$FILES
 
       - name: Generate aggregate report
         run: |
