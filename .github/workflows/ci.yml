@@ -78,6 +78,7 @@ jobs:
 
       - name: Build and test with coverage
         run: |
+          # Сначала собираем все модули с покрытием
           for d in *; do
             if [ -f "$d/pom.xml" ] && [ "$d" != "core" ] && [ "$d" != "server" ] && [ "$d" != "coverage-report" ]; then
               echo "=== Building $d ==="
@@ -86,20 +87,19 @@ jobs:
                 -Dspring.datasource.username=${{ env.POSTGRES_USER }} \
                 -Dspring.datasource.password=${{ env.POSTGRES_PASSWORD }} \
                 -DKAFKA_BOOTSTRAP_SERVERS=${{ env.KAFKA_BOOTSTRAP_SERVERS }} || true
-
-              echo "=== Generating JaCoCo report for $d ==="
-              mvn -f "$d/pom.xml" org.jacoco:jacoco-maven-plugin:report
             fi
           done
 
-      - name: Save target folders
+          # Затем генерируем сводный отчёт
+          echo "=== Generating aggregate report ==="
+          mvn org.jacoco:jacoco-maven-plugin:report-aggregate
+
+      - name: Upload aggregate report
         uses: actions/upload-artifact@v4
         with:
-          name: target-folders
-          path: |
-            */target/site/jacoco
-            */target/surefire-reports
-          retention-days: 1
+          name: coverage-aggregate
+          path: target/site/jacoco-aggregate
+          retention-days: 7
 
       - name: Parse and display coverage summary
         if: always()
@@ -108,6 +108,34 @@ jobs:
           echo "| Module | Line Coverage | Branch Coverage |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|--------------:|----------------:|" >> $GITHUB_STEP_SUMMARY
 
+          # Парсим сводный отчёт
+          if [ -f "target/site/jacoco-aggregate/jacoco.csv" ]; then
+            {
+              read -r
+              while IFS=',' read -r group package class ins_missed ins_covered branch_missed branch_covered; do
+                if [[ "$group" == "Total" && "$package" == "" ]]; then
+                  total_ins=$((ins_covered + ins_missed))
+                  if [ "$total_ins" -eq 0 ]; then
+                    line_cov="N/A"
+                  else
+                    line_cov=$(echo "scale=2; $ins_covered*100/$total_ins" | bc)
+                  fi
+
+                  total_br=$((branch_covered + branch_missed))
+                  if [ "$total_br" -eq 0 ]; then
+                    br_cov="N/A"
+                  else
+                    br_cov=$(echo "scale=2; $branch_covered*100/$total_br" | bc)
+                  fi
+
+                  echo "| All Modules | ${line_cov}% | ${br_cov}% |" >> $GITHUB_STEP_SUMMARY
+                  break
+                fi
+              done
+            } < "target/site/jacoco-aggregate/jacoco.csv"
+          fi
+
+          # Добавляем данные по каждому модулю
           for csv_file in $(find . -path "*/target/site/jacoco/jacoco.csv"); do
             module=$(dirname $(dirname $(dirname $(dirname $csv_file))))
             module=${module#./}
