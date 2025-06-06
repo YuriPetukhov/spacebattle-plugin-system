@@ -87,10 +87,8 @@ jobs:
 
       - name: Generate aggregate report
         run: |
-          # Генерируем сводный отчёт из объединённых данных
-          mvn org.jacoco:jacoco-maven-plugin:report \
-            -Djacoco.dataFile=./target/merged-jacoco.exec \
-            -DoutputDirectory=./target/site/jacoco-aggregate
+          mvn -f coverage-report/pom.xml verify
+      
 
       - name: Upload reports
         uses: actions/upload-artifact@v4
