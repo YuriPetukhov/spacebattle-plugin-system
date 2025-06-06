@@ -103,8 +103,21 @@ jobs:
           path: coverage-report/target/site/jacoco-aggregate
           retention-days: 7
 
-      - name: Display coverage summary in PR
-        uses: mikepenz/action-jacoco-report@v2
-        with:
-          paths: '**/target/site/jacoco/*.xml'
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Parse and display coverage summary
+        if: always()
+        run: |
+          echo "### Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Module | Line Coverage | Branch Coverage |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------------:|----------------:|" >> $GITHUB_STEP_SUMMARY
+          
+          for report in $(find . -name "jacoco.xml"); do
+            module=$(dirname $(dirname $(dirname $report)))
+            module=${module#./}
+          
+            line_coverage=$(grep -oP 'LINE.*?covered="\K[^"]+' $report | head -1 || echo "N/A")
+            branch_coverage=$(grep -oP 'BRANCH.*?covered="\K[^"]+' $report | head -1 || echo "N/A")
+          
+            echo "| $module | ${line_coverage:-N/A}% | ${branch_coverage:-N/A}% |" >> $GITHUB_STEP_SUMMARY
+          done
+          
+          cat $GITHUB_STEP_SUMMARY
