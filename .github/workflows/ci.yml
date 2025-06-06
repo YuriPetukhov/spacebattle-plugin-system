@@ -52,8 +52,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK 19
         uses: actions/setup-java@v4
@@ -62,107 +60,82 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven
-
-      - name: Build and install core
-        run: mvn -f core/pom.xml clean install
-
-      - name: Build and install server
-        run: mvn -f server/pom.xml clean install
-
-      - name: Build and test with coverage
+      - name: Build with coverage
         run: |
-          # Сначала собираем все модули с покрытием
-          for d in *; do
-            if [ -f "$d/pom.xml" ] && [ "$d" != "core" ] && [ "$d" != "server" ] && [ "$d" != "coverage-report" ]; then
-              echo "=== Building $d ==="
-              mvn -f "$d/pom.xml" clean org.jacoco:jacoco-maven-plugin:prepare-agent verify \
-                -Dspring.datasource.url=${{ env.POSTGRES_URL }} \
-                -Dspring.datasource.username=${{ env.POSTGRES_USER }} \
-                -Dspring.datasource.password=${{ env.POSTGRES_PASSWORD }} \
-                -DKAFKA_BOOTSTRAP_SERVERS=${{ env.KAFKA_BOOTSTRAP_SERVERS }} || true
-            fi
+          # Собираем все модули с генерацией jacoco.exec
+          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install \
+            -Dspring.datasource.url=${{ env.POSTGRES_URL }} \
+            -Dspring.datasource.username=${{ env.POSTGRES_USER }} \
+            -Dspring.datasource.password=${{ env.POSTGRES_PASSWORD }} \
+            -DKAFKA_BOOTSTRAP_SERVERS=${{ env.KAFKA_BOOTSTRAP_SERVERS }}
+
+      - name: Generate module reports
+        run: |
+          # Генерируем отчёты для каждого модуля
+          for dir in $(find . -name "pom.xml" -exec dirname {} \; | sort -u); do
+            echo "Generating report for $dir"
+            (cd "$dir" && mvn org.jacoco:jacoco-maven-plugin:report)
           done
 
-          # Затем генерируем сводный отчёт
-          echo "=== Generating aggregate report ==="
-          mvn org.jacoco:jacoco-maven-plugin:report-aggregate
+      - name: Merge all coverage data
+        run: |
+          # Собираем все jacoco.exec файлы
+          find . -name "jacoco.exec" -exec echo -n "--input-files {} " \; | xargs \
+            mvn org.jacoco:jacoco-maven-plugin:merge \
+              -Djacoco.destFile=./target/merged-jacoco.exec
 
-      - name: Upload aggregate report
+      - name: Generate aggregate report
+        run: |
+          # Генерируем сводный отчёт из объединённых данных
+          mvn org.jacoco:jacoco-maven-plugin:report \
+            -Djacoco.dataFile=./target/merged-jacoco.exec \
+            -DoutputDirectory=./target/site/jacoco-aggregate
+
+      - name: Upload reports
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-aggregate
-          path: target/site/jacoco-aggregate
+          name: coverage-reports
+          path: |
+            **/target/site/jacoco
+            target/site/jacoco-aggregate
           retention-days: 7
 
-      - name: Parse and display coverage summary
-        if: always()
+      - name: Display coverage
         run: |
           echo "### Coverage Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Module | Line Coverage | Branch Coverage |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|--------------:|----------------:|" >> $GITHUB_STEP_SUMMARY
-
-          # Парсим сводный отчёт
+          
+          # Агрегированная статистика
           if [ -f "target/site/jacoco-aggregate/jacoco.csv" ]; then
-            {
-              read -r
-              while IFS=',' read -r group package class ins_missed ins_covered branch_missed branch_covered; do
-                if [[ "$group" == "Total" && "$package" == "" ]]; then
-                  total_ins=$((ins_covered + ins_missed))
-                  if [ "$total_ins" -eq 0 ]; then
-                    line_cov="N/A"
-                  else
-                    line_cov=$(echo "scale=2; $ins_covered*100/$total_ins" | bc)
-                  fi
-
-                  total_br=$((branch_covered + branch_missed))
-                  if [ "$total_br" -eq 0 ]; then
-                    br_cov="N/A"
-                  else
-                    br_cov=$(echo "scale=2; $branch_covered*100/$total_br" | bc)
-                  fi
-
-                  echo "| All Modules | ${line_cov}% | ${br_cov}% |" >> $GITHUB_STEP_SUMMARY
-                  break
-                fi
-              done
-            } < "target/site/jacoco-aggregate/jacoco.csv"
+            awk -F, '
+              NR>1 && $1=="Total" && $2=="" {
+                total = $4 + $5;
+                if(total > 0) {
+                  line = $5 * 100 / total;
+                  branch_total = $6 + $7;
+                  branch = branch_total > 0 ? $7 * 100 / branch_total : 0;
+                  printf "| All Modules | %.2f%% | %.2f%% |\n", line, branch;
+                }
+              }
+            ' "target/site/jacoco-aggregate/jacoco.csv" >> $GITHUB_STEP_SUMMARY
           fi
-
-          # Добавляем данные по каждому модулю
-          for csv_file in $(find . -path "*/target/site/jacoco/jacoco.csv"); do
-            module=$(dirname $(dirname $(dirname $(dirname $csv_file))))
+          
+          # Статистика по модулям
+          for csv in $(find . -path "*/target/site/jacoco/jacoco.csv" -not -path "./target/site/jacoco-aggregate/*"); do
+            module=$(dirname $(dirname $(dirname $(dirname $csv))))
             module=${module#./}
-
-            {
-              read -r
-              while IFS=',' read -r group package class ins_missed ins_covered branch_missed branch_covered; do
-                if [[ "$group" == "Total" && "$package" == "" ]]; then
-                  total_ins=$((ins_covered + ins_missed))
-                  if [ "$total_ins" -eq 0 ]; then
-                    line_cov="N/A"
-                  else
-                    line_cov=$(echo "scale=2; $ins_covered*100/$total_ins" | bc)
-                  fi
-
-                  total_br=$((branch_covered + branch_missed))
-                  if [ "$total_br" -eq 0 ]; then
-                    br_cov="N/A"
-                  else
-                    br_cov=$(echo "scale=2; $branch_covered*100/$total_br" | bc)
-                  fi
-
-                  echo "| $module | ${line_cov}% | ${br_cov}% |" >> $GITHUB_STEP_SUMMARY
-                  break
-                fi
-              done
-            } < "$csv_file"
+            awk -F, -v module="$module" '
+              NR>1 && $1=="Total" && $2=="" {
+                total = $4 + $5;
+                if(total > 0) {
+                  line = $5 * 100 / total;
+                  branch_total = $6 + $7;
+                  branch = branch_total > 0 ? $7 * 100 / branch_total : 0;
+                  printf "| %s | %.2f%% | %.2f%% |\n", module, line, branch;
+                }
+              }
+            ' "$csv" >> $GITHUB_STEP_SUMMARY
           done
-
+          
           cat $GITHUB_STEP_SUMMARY
