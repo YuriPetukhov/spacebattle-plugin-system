@@ -53,7 +53,6 @@ class SignatureUtilTest {
         keyGen.initialize(2048);
         KeyPair pair = keyGen.generateKeyPair();
 
-        // сохраняем публичный ключ во временный файл
         byte[] encodedKey = pair.getPublic().getEncoded();
         File keyFile = File.createTempFile("pubkey", ".key");
         Files.write(keyFile.toPath(), encodedKey);

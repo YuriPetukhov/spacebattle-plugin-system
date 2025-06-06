@@ -34,7 +34,7 @@ public class SpaceBattleInitializer {
     }
 
     public static Thread initialize(IoCContainer ioc, PluginLoader loader) throws Exception {
-        System.out.println("🚀 SpaceBattle Plugin System Starting...");
+        System.out.println("SpaceBattle Plugin System Starting...");
 
         // Регистрация IoC.Register
         ioc.register("IoC.Register", params -> {

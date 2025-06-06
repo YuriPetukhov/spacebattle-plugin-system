@@ -11,7 +11,6 @@ class DefaultExceptionHandlerTest {
 
     @Test
     void testHandleOutputsToStderr() {
-        // Подменим System.err
         ByteArrayOutputStream errContent = new ByteArrayOutputStream();
         PrintStream originalErr = System.err;
         System.setErr(new PrintStream(errContent));
@@ -26,7 +25,6 @@ class DefaultExceptionHandlerTest {
             assertTrue(output.contains("[EXCEPTION] TestClass: Something went wrong"));
             assertTrue(output.contains("java.lang.RuntimeException"));
         } finally {
-            // Восстановим stderr
             System.setErr(originalErr);
         }
     }

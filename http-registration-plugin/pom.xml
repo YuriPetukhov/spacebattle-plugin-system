@@ -4,11 +4,10 @@
 
   <groupId>org.spacebattle</groupId>
   <artifactId>http-registration-plugin</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>http-registration-plugin</name>
-  <url>http://maven.apache.org</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,7 +23,7 @@
     <dependency>
       <groupId>org.spacebattle</groupId>
       <artifactId>core</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

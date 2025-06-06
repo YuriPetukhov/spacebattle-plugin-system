@@ -27,7 +27,6 @@ class ObjectDefinitionTest {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         ObjectDefinition def = mapper.readValue(yaml, ObjectDefinition.class);
 
-        // Проверка свойств
         assertNotNull(def.properties);
         assertTrue(def.properties.containsKey("location"));
         Map<String, Integer> location = (Map<String, Integer>) def.properties.get("location");
@@ -35,7 +34,6 @@ class ObjectDefinitionTest {
         assertEquals(10, location.get("y"));
         assertEquals("test-ship", def.properties.get("name"));
 
-        // Проверка способностей
         assertNotNull(def.capabilities);
         assertEquals(List.of("move", "rotate"), def.capabilities);
     }

@@ -8,6 +8,7 @@ import org.spacebattle.ioc.IoCContainer;
 
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.*;
 
 class KafkaEventPublisherBootstrapTest {
@@ -39,7 +40,7 @@ class KafkaEventPublisherBootstrapTest {
 
     @Test
     void run_shouldThrowException_whenEnvVarNotSet() {
-        System.clearProperty("KAFKA_BOOTSTRAP_SERVERS");
+        assumeTrue(System.getenv("KAFKA_BOOTSTRAP_SERVERS") == null);
         assertThrows(RuntimeException.class, bootstrap::run);
     }
 }

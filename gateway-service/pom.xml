@@ -6,11 +6,11 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.0</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>org.spacebattle</groupId>
-	<artifactId>gateway</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>gateway-service</artifactId>
+	<version>1.0.0</version>
 	<name>gateway space battle project</name>
 	<description>gateway for </description>
 	<url/>
@@ -31,27 +31,22 @@
 		<spring-cloud.version>2025.0.0-RC1</spring-cloud.version>
 	</properties>
 	<dependencies>
-		<!-- ✅ Только WebFlux-версия gateway -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
 		</dependency>
 
-
-		<!-- ✅ WebFlux как web-движок -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 
-		<!-- ✅ Lombok (для @Slf4j и др.) -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
 
-		<!-- ✅ Для тестов -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
