@@ -104,7 +104,7 @@ jobs:
           retention-days: 7
 
       - name: Display coverage summary in PR
-        uses: mikepenz/action-jacoco-report@v4
+        uses: mikepenz/action-jacoco-report@v2
         with:
           paths: '**/target/site/jacoco/*.xml'
           token: ${{ secrets.GITHUB_TOKEN }}
