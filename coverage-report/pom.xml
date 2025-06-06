@@ -30,12 +30,110 @@
         <module>../token-plugin</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>auth-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>auth-service</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>dsl</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>error-handler-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>eventloop-control-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>game-client-ui</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>gateway-service</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>hello-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>http-controller-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>http-registration-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>kafka-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>logging-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>macro-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>middleware-exception-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>movement-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>rotate-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>server</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spacebattle</groupId>
+            <artifactId>token-plugin</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.11</version>
+                <version>0.8.10</version>
                 <executions>
                     <execution>
                         <id>report-aggregate</id>
@@ -46,8 +144,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-
 </project>
