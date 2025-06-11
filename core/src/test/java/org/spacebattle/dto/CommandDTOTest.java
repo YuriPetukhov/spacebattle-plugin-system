@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CommandDTOTest {
 
-    // Тесты для основного конструктора
     @Test
     void constructor_ShouldCreateValidObject_WhenAllFieldsProvided() {
         Map<String, Object> params = Map.of("speed", 10);
@@ -31,7 +30,6 @@ class CommandDTOTest {
         assertTrue(dto.params().isEmpty());
     }
 
-    // Тесты для fromMap()
     @Test
     void fromMap_ShouldCreateValidDTO_WithRequiredFields() {
         Map<String, Object> input = Map.of(
@@ -89,7 +87,6 @@ class CommandDTOTest {
         assertFalse(dto.params().containsKey(42));
     }
 
-    // Тесты на иммутабельность
     @Test
     void paramsMap_ShouldBeImmutable_AfterCreation() {
         Map<String, Object> mutableParams = new HashMap<>();
@@ -117,7 +114,6 @@ class CommandDTOTest {
         });
     }
 
-    // Параметризованные тесты для разных типов параметров
     static Stream<Map<String, Object>> paramTypesProvider() {
         return Stream.of(
                 Map.of("int", 42),
@@ -139,7 +135,6 @@ class CommandDTOTest {
         assertEquals(params, dto.params());
     }
 
-    // Тест на обработку case-sensitive ключей
     @Test
     void fromMap_ShouldPreserveKeyCase() {
         Map<String, Object> input = Map.of(

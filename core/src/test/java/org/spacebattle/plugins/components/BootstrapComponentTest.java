@@ -84,7 +84,7 @@ class BootstrapComponentTest {
 
     @Test
     void testMissingPluginKeyDoesNothing() {
-        Map<String, Object> pluginSpec = Map.of(); // no "plugin"
+        Map<String, Object> pluginSpec = Map.of();
         assertDoesNotThrow(() -> component.apply(getClass().getClassLoader(), pluginSpec));
     }
 

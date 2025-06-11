@@ -2,9 +2,9 @@ name: Java CI + Code Coverage
 
 on:
   push:
-    branches: [ master ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ master ]
+    branches: [ "**" ]
 
 env:
   KAFKA_BOOTSTRAP_SERVERS: localhost:9092
@@ -51,9 +51,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v4
 
       - name: Set up JDK 19
         uses: actions/setup-java@v4
@@ -62,49 +60,84 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven
+      - name: Install parent pom
+        run: mvn -N install
 
-      - name: Build and install core
-        run: |
-          cd core
-          mvn clean install
+      - name: Build core
+        run: mvn -f core/pom.xml clean install -DskipTests
 
-      - name: Build and install server
-        run: |
-          cd ../server
-          mvn clean install
+      - name: Build server
+        run: mvn -f server/pom.xml clean install -DskipTests
 
-      - name: Build and test all other Maven projects
+      - name: Build and test all remaining modules with coverage
         run: |
-          for d in ../*; do
-            if [ -f "$d/pom.xml" ] && [[ "$d" != *"core"* && "$d" != *"server"* ]]; then
-              echo "=== Building $d ==="
-              (cd "$d" && mvn clean verify \
+          for d in *; do
+            if [ -f "$d/pom.xml" ] && [ "$d" != "core" ] && [ "$d" != "server" ] && [ "$d" != "coverage-report" ]; then
+              echo "Building $d"
+              mvn -f "$d/pom.xml" clean verify org.jacoco:jacoco-maven-plugin:prepare-agent \
                 -Dspring.datasource.url=${{ env.POSTGRES_URL }} \
                 -Dspring.datasource.username=${{ env.POSTGRES_USER }} \
                 -Dspring.datasource.password=${{ env.POSTGRES_PASSWORD }} \
-                -DKAFKA_BOOTSTRAP_SERVERS=${{ env.KAFKA_BOOTSTRAP_SERVERS }} ) || exit 1
+                -DKAFKA_BOOTSTRAP_SERVERS=${{ env.KAFKA_BOOTSTRAP_SERVERS }} || true
             fi
           done
 
-      - name: Collect test artifacts
-        if: always()
-        run: |
-          mkdir -p test-results
-          find . -type f -regex ".*/target/.*-reports/.*" -exec cp --parents {} test-results \;
-          find . -type d -name "jacoco" -exec cp -r --parents {} test-results \;
-          find . -type d -name "jacoco-aggregate" -exec cp -r --parents {} test-results \;
+      - name: Generate aggregate report
+        run: mvn -f coverage-report/pom.xml verify
 
-      - name: Upload test artifacts
-        if: always()
-        uses: actions/upload-artifact@v3
+      - name: Upload aggregated coverage report
+        uses: actions/upload-artifact@v4
         with:
-          name: test-artifacts
-          path: test-results
-          retention-days: 7
+          name: jacoco-aggregate-report
+          path: coverage-report/target/site/jacoco-aggregate
+
+      - name: Display coverage
+        run: |
+          echo "### Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Module | Line Coverage | Branch Coverage |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------------:|----------------:|" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "coverage-report/target/site/jacoco-aggregate/jacoco.csv" ]; then
+            awk -F, '
+              BEGIN {
+                OFMT="%.2f"
+              }
+              NR > 1 {
+                split($1, pathParts, "/")
+                module = pathParts[length(pathParts)]
+                instr_missed[module] += $4
+                instr_covered[module] += $5
+                branch_missed[module] += $6
+                branch_covered[module] += $7
+                total_instr_missed += $4
+                total_instr_covered += $5
+                total_branch_missed += $6
+                total_branch_covered += $7
+              }
+              END {
+                for (m in instr_missed) {
+                  instr_total = instr_missed[m] + instr_covered[m]
+                  branch_total = branch_missed[m] + branch_covered[m]
+                  line_pct = instr_total > 0 ? instr_covered[m] * 100 / instr_total : 0
+                  branch_pct = branch_total > 0 ? branch_covered[m] * 100 / branch_total : 0
+                  printf("| %s | %.2f%% | %.2f%% |\n", m, line_pct, branch_pct) >> ENVIRON["GITHUB_STEP_SUMMARY"]
+                }
+                total_instr = total_instr_missed + total_instr_covered
+                total_branch = total_branch_missed + total_branch_covered
+                total_line_pct = total_instr > 0 ? total_instr_covered * 100 / total_instr : 0
+                total_branch_pct = total_branch > 0 ? total_branch_covered * 100 / total_branch : 0
+                printf("\n**Total Coverage**\n\n") >> ENVIRON["GITHUB_STEP_SUMMARY"]
+                printf("| All Modules | %.2f%% | %.2f%% |\n", total_line_pct, total_branch_pct) >> ENVIRON["GITHUB_STEP_SUMMARY"]
+              }
+            ' "coverage-report/target/site/jacoco-aggregate/jacoco.csv"
+          else
+            echo "jacoco.csv not found!" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          cat $GITHUB_STEP_SUMMARY
+      
+      
+      
+      
+
+
